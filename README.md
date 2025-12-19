@@ -15,7 +15,7 @@ javadoc -d doc ./*.java
 ```
 
 ### Usage Help
-```bash
+```
 Usage:
 > java Relaxation -h | --help
 > java Relaxation <input_image> <compact_brush> <elongated_brush> <density> [-f] [-r <seed>] [-g <std>] [-n <std2>]
