@@ -263,7 +263,7 @@ public class Relaxation
      * -g sets the standard deviation of a gaussian blur applied to output images <p>
      * -n sets the standard deviation of gaussian noise added to the smaller strokes in the painting
      * 
-     * @param args: <input_image> <compact_brush> <elongated_brush> <density> [-f] [-r <seed>] [-g <std>] [-n <std2>]
+     * @param args: input_image compact_brush elongated_brush density [-f] [-r seed] [-g std] [-n std2]
      */
     public static void main(String[] args)
     {
@@ -400,4 +400,5 @@ public class Relaxation
         }
         
     }
+
 }
