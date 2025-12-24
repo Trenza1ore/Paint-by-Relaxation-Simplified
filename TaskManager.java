@@ -5,25 +5,20 @@ import java.time.LocalTime;
  * This TaskManager class displays information about the task that is currently being performed
  * this also allows for sensible error messages to be thrown when an exception happens
  */
-public class TaskManager
-{
+public class TaskManager {
     public int taskID = 0;
     private int startTime, subTaskID, startTimeSub, taskIDEnd, subTaskIDEnd,
-        startTimeTotal = LocalTime.now().toSecondOfDay();
-    private String  timerTemplate = "done, took %d second(s)\n",
-                    finish = "All tasks finished!\n";
-    private String[] brushNames = { "compact", "elongated" }, msg = {
-        " Parsing command line arguments...",
-        " Creating sobel magnitude map via image pyramid...",
-        " Creating sobel orientation map with filtered image...",
-        " Creating multiple versions of the brushes...",
-        " Calculating Multi-scale Difference of Gaussians...",
-        " Rendering strokes onto the canvas...",
-        " Filling the unpainted areas with appropriate colours..."
-    };
+            startTimeTotal = LocalTime.now().toSecondOfDay();
+    private String timerTemplate = "done, took %d second(s)\n", finish = "All tasks finished!\n";
+    private String[] brushNames = {"compact", "elongated"},
+                     msg = {" Parsing command line arguments...", " Creating sobel magnitude map via image pyramid...",
+                             " Creating sobel orientation map with filtered image...",
+                             " Creating multiple versions of the brushes...",
+                             " Calculating Multi-scale Difference of Gaussians...",
+                             " Rendering strokes onto the canvas...",
+                             " Filling the unpainted areas with appropriate colours..."};
 
-    public TaskManager()
-    {
+    public TaskManager() {
         taskIDEnd = 7;
         subTaskID = 0;
         subTaskIDEnd = 10;
@@ -39,8 +34,7 @@ public class TaskManager
      * @param subTaskIDEnd end of the subtaskID range (exclusive)
      * @param finish the message to display after program finishes execution
      */
-    public TaskManager(String[] msg, int taskIDEnd, int subTaskIDStart, int subTaskIDEnd, String finish)
-    {
+    public TaskManager(String[] msg, int taskIDEnd, int subTaskIDStart, int subTaskIDEnd, String finish) {
         subTaskID = subTaskIDStart;
         this.msg = msg;
         this.taskIDEnd = taskIDEnd;
@@ -48,14 +42,12 @@ public class TaskManager
         this.finish = finish;
     }
 
-    public void StartTask()
-    {
+    public void StartTask() {
         System.out.println("Task " + taskID + msg[taskID]);
         startTime = LocalTime.now().toSecondOfDay();
     }
 
-    public void FinishTask()
-    {
+    public void FinishTask() {
         System.out.printf(timerTemplate, LocalTime.now().toSecondOfDay() - startTime);
         taskID++;
         if (taskID < taskIDEnd) {
@@ -63,19 +55,16 @@ public class TaskManager
         } else {
             System.out.println(finish);
             System.out.printf("This input image took %d second(s) in total to paint.\n",
-                LocalTime.now().toSecondOfDay() - startTimeTotal);
+                    LocalTime.now().toSecondOfDay() - startTimeTotal);
         }
     }
 
-    public void StartSubTask()
-    {
-        System.out.printf("  - %9s brush with scale of %d/5...",
-            brushNames[subTaskID / 5], 5 - (subTaskID % 5));
+    public void StartSubTask() {
+        System.out.printf("  - %9s brush with scale of %d/5...", brushNames[subTaskID / 5], 5 - (subTaskID % 5));
         startTimeSub = LocalTime.now().toSecondOfDay();
     }
 
-    public void FinishSubTask()
-    {
+    public void FinishSubTask() {
         System.out.printf("  " + timerTemplate, LocalTime.now().toSecondOfDay() - startTimeSub);
         subTaskID++;
         if (subTaskID < subTaskIDEnd) {

@@ -5,8 +5,7 @@
  * the strokes.
  * @author Hugo (Jin Huang)
  */
-public class PixelRotator implements Runnable
-{
+public class PixelRotator implements Runnable {
     private float a, b, c, d;
     private int[][] srcImg, dstImg;
     private int n, m;
@@ -24,8 +23,7 @@ public class PixelRotator implements Runnable
      * @param targetSize destination image's size
      * @param rotMatrix rotation matrix
      */
-    public PixelRotator(int[][] srcImg, int[][] dstImg, int inputSize, int targetSize, float[] rotMatrix)
-    {
+    public PixelRotator(int[][] srcImg, int[][] dstImg, int inputSize, int targetSize, float[] rotMatrix) {
         this.srcImg = srcImg;
         this.dstImg = dstImg;
         n = inputSize;
@@ -49,12 +47,11 @@ public class PixelRotator implements Runnable
      * @param inputSize source image's size
      * @param angle the angle to rotate the source image by
      */
-    public PixelRotator(int[][] srcImg, int[][] dstImg, int inputSize, float angle)
-    {
+    public PixelRotator(int[][] srcImg, int[][] dstImg, int inputSize, float angle) {
         this.srcImg = srcImg;
         this.dstImg = dstImg;
         n = inputSize;
-        m = (int) Math.sqrt(2*n*n) + 1;
+        m = (int) Math.sqrt(2 * n * n) + 1;
         float[] rotMatrix = ArrayHelper.RotationMatrix(angle);
         // Extract elements in the rotation matrix
         a = rotMatrix[0];
@@ -64,11 +61,10 @@ public class PixelRotator implements Runnable
     }
 
     @Override
-    public void run()
-    {
+    public void run() {
         int i, j;
         // Offset from the centre of the image
-        float inputMid = ((float) (n + 1))/2 - 1, targetMid = ((float) (m + 1))/2 - 1;
+        float inputMid = ((float) (n + 1)) / 2 - 1, targetMid = ((float) (m + 1)) / 2 - 1;
         // X and Y Coordinates before and after transformation by the rotation matrix
         float x0, x1, y0, y1;
         int xLo, xHi, yLo, yHi;
@@ -85,13 +81,13 @@ public class PixelRotator implements Runnable
                     x0 = (j - inputMid);
                     y0 = (i - inputMid);
                     // Matrix multiplication, unravelled
-                    x1 = a*x0 + b*y0 + targetMid;
-                    y1 = c*x0 + d*y0 + targetMid;
+                    x1 = a * x0 + b * y0 + targetMid;
+                    y1 = c * x0 + d * y0 + targetMid;
                     // Map the rotated brush pixel to imgCopy
-                    yLo = Math.min((int) y1, m-1);
-                    yHi = Math.min(yLo+1, m-1);
-                    xLo = Math.min((int) x1, m-1);
-                    xHi = Math.min(xLo+1, m-1);
+                    yLo = Math.min((int) y1, m - 1);
+                    yHi = Math.min(yLo + 1, m - 1);
+                    xLo = Math.min((int) x1, m - 1);
+                    xHi = Math.min(xLo + 1, m - 1);
                     dstImg[xLo][yLo] += 1;
                     dstImg[xLo][yHi] += 1;
                     dstImg[xHi][yLo] += 1;

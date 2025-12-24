@@ -15,49 +15,40 @@
 import java.io.*;
 import java.util.*;
 
-public class ImagePPM
-{
-    public int [][][] pixels;
-    public int depth,width,height;
+public class ImagePPM {
+    public int[][][] pixels;
+    public int depth, width, height;
 
-    public ImagePPM()
-    {
+    public ImagePPM() {
         pixels = new int[3][1500][1500];
         depth = width = height = 0;
     }
 
-    public ImagePPM(int inDepth, int inWidth, int inHeight)
-    {
+    public ImagePPM(int inDepth, int inWidth, int inHeight) {
         pixels = new int[3][inWidth][inHeight];
         width = inWidth;
         height = inHeight;
         depth = inDepth;
     }
 
-    public void ReadPPM(String fileName)
-    {
+    public void ReadPPM(String fileName) {
         String line;
         StringTokenizer st;
 
         try {
             BufferedReader in =
-              new BufferedReader(new InputStreamReader(
-                new BufferedInputStream(
-                  new FileInputStream(fileName))));
+                    new BufferedReader(new InputStreamReader(new BufferedInputStream(new FileInputStream(fileName))));
 
-            DataInputStream in2 =
-              new DataInputStream(
-                new BufferedInputStream(
-                  new FileInputStream(fileName)));
+            DataInputStream in2 = new DataInputStream(new BufferedInputStream(new FileInputStream(fileName)));
 
             // read PPM image header
 
             // skip comments
             line = in.readLine();
-            in2.skip((line+"\n").getBytes().length);
+            in2.skip((line + "\n").getBytes().length);
             do {
                 line = in.readLine();
-                in2.skip((line+"\n").getBytes().length);
+                in2.skip((line + "\n").getBytes().length);
             } while (line.charAt(0) == '#');
 
             // the current line has dimensions
@@ -70,49 +61,43 @@ public class ImagePPM
 
             // next line has pixel depth
             line = in.readLine();
-            in2.skip((line+"\n").getBytes().length);
+            in2.skip((line + "\n").getBytes().length);
             st = new StringTokenizer(line);
             depth = Integer.parseInt(st.nextToken());
 
             // read pixels now
             for (int y = 0; y < height; y++)
                 for (int x = 0; x < width; x++)
-                    for (int i = 0; i < 3; i++)
-                        pixels[i][x][y] = in2.readUnsignedByte();
+                    for (int i = 0; i < 3; i++) pixels[i][x][y] = in2.readUnsignedByte();
 
             in.close();
             in2.close();
-        } catch(ArrayIndexOutOfBoundsException e) {
-            System.out.println("Error: image in "+fileName+" too big");
-        } catch(FileNotFoundException e) {
-            System.out.println("Error: file "+fileName+" not found");
-        } catch(IOException e) {
-            System.out.println("Error: end of stream encountered when reading "+fileName);
+        } catch (ArrayIndexOutOfBoundsException e) {
+            System.out.println("Error: image in " + fileName + " too big");
+        } catch (FileNotFoundException e) {
+            System.out.println("Error: file " + fileName + " not found");
+        } catch (IOException e) {
+            System.out.println("Error: end of stream encountered when reading " + fileName);
         }
     }
 
-    public void WritePPM(String fileName)
-    {
+    public void WritePPM(String fileName) {
         String line;
         StringTokenizer st;
 
         try {
-            DataOutputStream out =
-              new DataOutputStream(
-                new BufferedOutputStream(
-                  new FileOutputStream(fileName)));
+            DataOutputStream out = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(fileName)));
 
             out.writeBytes("P6\n");
             out.writeBytes("#created by Paul Rosin\n");
-            out.writeBytes(width+" "+height+"\n255\n");
+            out.writeBytes(width + " " + height + "\n255\n");
 
             for (int y = 0; y < height; y++)
                 for (int x = 0; x < width; x++)
-                    for (int i = 0; i < 3; i++)
-                        out.writeByte((byte)pixels[i][x][y]);
+                    for (int i = 0; i < 3; i++) out.writeByte((byte) pixels[i][x][y]);
 
             out.close();
-        } catch(IOException e) {
+        } catch (IOException e) {
             System.out.println("ERROR: cannot write output file");
         }
     }

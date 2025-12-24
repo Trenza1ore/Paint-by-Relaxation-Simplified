@@ -5,7 +5,6 @@ import java.util.*;
  * @author Hugo (Jin Huang)
  */
 public class ArrayHelper {
-
     /**
      * Convert a 2D array of integers into a 2D array of doubles
      *
@@ -14,8 +13,7 @@ public class ArrayHelper {
      * @param height arr's column number
      * @return double[][] 2D double array
      */
-    public static double[][] Int2Double(int[][] arr, int width, int height)
-    {
+    public static double[][] Int2Double(int[][] arr, int width, int height) {
         double[][] result = new double[width][height];
         int row, col;
 
@@ -28,7 +26,6 @@ public class ArrayHelper {
         return result;
     }
 
-
     /**
      * Convert a 2D array of doubles into a 2D array of integers
      *
@@ -37,8 +34,7 @@ public class ArrayHelper {
      * @param height arr's column number
      * @return int[][] 2D integer array
      */
-    public static int[][] Double2Int(double[][] arr, int width, int height)
-    {
+    public static int[][] Double2Int(double[][] arr, int width, int height) {
         int[][] result = new int[width][height];
         int row, col;
 
@@ -51,7 +47,6 @@ public class ArrayHelper {
         return result;
     }
 
-
     /**
      * Convert a 3D array of doubles into a 2D array of integers, the shape is
      * always (3, width, height) as we only need to convert RGB colour images
@@ -61,8 +56,7 @@ public class ArrayHelper {
      * @param height arr's column number
      * @return int[][] 3D integer array (RGB colour image)
      */
-    public static int[][][] Double2Int(double[][][] arr, int width, int height)
-    {
+    public static int[][][] Double2Int(double[][][] arr, int width, int height) {
         int[][][] result = new int[3][width][height];
 
         for (int i = 0; i < 3; i++) {
@@ -72,7 +66,6 @@ public class ArrayHelper {
         return result;
     }
 
-
     /**
      * Clones an image array (grayscale or one colour channel)
      *
@@ -80,8 +73,7 @@ public class ArrayHelper {
      * @param width arr's row number
      * @return int[][] cloned array
      */
-    public static int[][] CloneImage(int[][] arr, int width)
-    {
+    public static int[][] CloneImage(int[][] arr, int width) {
         int[][] clone = new int[width][];
 
         for (int i = 0; i < width; i++) {
@@ -90,7 +82,6 @@ public class ArrayHelper {
 
         return clone;
     }
-
 
     /**
      * Clones part of an image array (grayscale or one colour channel) corresponds to
@@ -103,13 +94,11 @@ public class ArrayHelper {
      * @param cEnd upper bound in columns (exclusive)
      * @return int[][] cloned array (of the specified area)
      */
-    public static int[][] CloneImage(int[][] arr, int rStart, int rEnd, int cStart, int cEnd)
-    {
+    public static int[][] CloneImage(int[][] arr, int rStart, int rEnd, int cStart, int cEnd) {
         int rLen = rEnd - rStart, cLen = cEnd - cStart;
 
         return CloneImage(arr, rStart, rEnd, rLen, cStart, cEnd, cLen);
     }
-
 
     /**
      * Clones part of an image array (grayscale or one colour channel) corresponds to
@@ -124,17 +113,15 @@ public class ArrayHelper {
      * @param cLen cEnd - cStart
      * @return int[][] cloned array (of the specified area)
      */
-    public static int[][] CloneImage(int[][] arr, int rStart, int rEnd, int rLen, int cStart, int cEnd, int cLen)
-    {
+    public static int[][] CloneImage(int[][] arr, int rStart, int rEnd, int rLen, int cStart, int cEnd, int cLen) {
         int[][] clone = new int[rEnd - rStart][cEnd - cStart];
 
         for (int i = rStart; i < rEnd; i++) {
-            System.arraycopy(arr[i], cStart, clone[i-rStart], 0, cLen);
+            System.arraycopy(arr[i], cStart, clone[i - rStart], 0, cLen);
         }
 
         return clone;
     }
-
 
     /**
      * Clones an image array (colour image), the shape is
@@ -144,8 +131,7 @@ public class ArrayHelper {
      * @param width arr's width (row number in each colour channel's 2D array)
      * @return int[][][] cloned array
      */
-    public static int[][][] CloneImage(int[][][] arr, int width)
-    {
+    public static int[][][] CloneImage(int[][][] arr, int width) {
         int[][][] clone = new int[3][][];
 
         for (int i = 0; i < 3; i++) {
@@ -154,7 +140,6 @@ public class ArrayHelper {
 
         return clone;
     }
-
 
     /**
      * Clones part of an image array (colour image) corresponds to
@@ -169,8 +154,7 @@ public class ArrayHelper {
      * @param cEnd upper bound in columns (exclusive)
      * @return int[][][] cloned array (of the specified area)
      */
-    public static int[][][] CloneImage(int[][][] arr, int rStart, int rEnd, int cStart, int cEnd)
-    {
+    public static int[][][] CloneImage(int[][][] arr, int rStart, int rEnd, int cStart, int cEnd) {
         int rLen = rEnd - rStart, cLen = cEnd - cStart;
         int[][][] clone = new int[3][][];
 
@@ -181,7 +165,6 @@ public class ArrayHelper {
         return clone;
     }
 
-
     /**
      * Fill a 2D array of integers with an element
      *
@@ -189,15 +172,13 @@ public class ArrayHelper {
      * @param element element to fill in
      * @param width arr's row number
      */
-    public static void FillArray(int[][] arr, int element, int width)
-    {
+    public static void FillArray(int[][] arr, int element, int width) {
         int i;
 
         for (i = 0; i < width; i++) {
             Arrays.fill(arr[i], element);
         }
     }
-
 
     /**
      * Fill a 3D array of integers with an element
@@ -207,8 +188,7 @@ public class ArrayHelper {
      * @param width arr's row number (3 if filling a colour image)
      * @param height arr's column number
      */
-    public static void FillArray(int[][][] arr, int element, int width, int height)
-    {
+    public static void FillArray(int[][][] arr, int element, int width, int height) {
         int i, j;
 
         for (i = 0; i < width; i++) {
@@ -218,7 +198,6 @@ public class ArrayHelper {
         }
     }
 
-
     /**
      * Calculate the sum of all elements in a 2D array of integers
      *
@@ -226,8 +205,7 @@ public class ArrayHelper {
      * @param size arr's row number
      * @return int the sum
      */
-    public static int SumArray(int[][] arr, int size)
-    {
+    public static int SumArray(int[][] arr, int size) {
         int i, result = 0;
 
         for (i = 0; i < size; i++) {
@@ -236,7 +214,6 @@ public class ArrayHelper {
 
         return result;
     }
-
 
     /**
      * Matrix addition, returns M0 + M1
@@ -247,8 +224,7 @@ public class ArrayHelper {
      * @param c the arrays' column number
      * @return int[][] M0 + M1
      */
-    public static int[][] AddArray(int[][] arr0, int[][] arr1, int r, int c)
-    {
+    public static int[][] AddArray(int[][] arr0, int[][] arr1, int r, int c) {
         int i, j;
         int[][] result = new int[r][c];
 
@@ -261,7 +237,6 @@ public class ArrayHelper {
         return result;
     }
 
-
     /**
      * Add a matrix by a scalar, returns M0 + element1
      *
@@ -271,8 +246,7 @@ public class ArrayHelper {
      * @param c M0's column number
      * @return int[][] M0 + element1
      */
-    public static int[][] AddArray(int[][] arr0, int element1, int r, int c)
-    {
+    public static int[][] AddArray(int[][] arr0, int element1, int r, int c) {
         int i, j;
         int[][] result = new int[r][c];
 
@@ -285,7 +259,6 @@ public class ArrayHelper {
         return result;
     }
 
-
     /**
      * Matrix addition, in-place (change M0 directly)
      *
@@ -294,8 +267,7 @@ public class ArrayHelper {
      * @param r the arrays' row number
      * @param c the arrays' column number
      */
-    public static void AddArrayInPlace(int[][] arr0, int[][] arr1, int r, int c)
-    {
+    public static void AddArrayInPlace(int[][] arr0, int[][] arr1, int r, int c) {
         int i, j;
         for (i = 0; i < r; i++) {
             for (j = 0; j < c; j++) {
@@ -303,7 +275,6 @@ public class ArrayHelper {
             }
         }
     }
-
 
     /**
      * Add a matrix by a scalar, in-place (change M0 directly)
@@ -313,8 +284,7 @@ public class ArrayHelper {
      * @param r M0's row number
      * @param c M0's column number
      */
-    public static void AddArrayInPlace(int[][] arr0, int element1, int r, int c)
-    {
+    public static void AddArrayInPlace(int[][] arr0, int element1, int r, int c) {
         int i, j;
         for (i = 0; i < r; i++) {
             for (j = 0; j < c; j++) {
@@ -322,7 +292,6 @@ public class ArrayHelper {
             }
         }
     }
-
 
     /**
      * Add a 3D tensor T0 by a scalar, in-place (change T0 directly),
@@ -334,13 +303,11 @@ public class ArrayHelper {
      * @param r T0's row number
      * @param c T0's column number
      */
-    public static void AddArrayInPlace(int[][][] arr0, int element1, int d, int r, int c)
-    {
+    public static void AddArrayInPlace(int[][][] arr0, int element1, int d, int r, int c) {
         for (int k = 0; k < d; k++) {
             AddArrayInPlace(arr0[k], element1, r, c);
         }
     }
-
 
     /**
      * Divide a matrix by a scalar, in-place (change M0 directly)
@@ -351,8 +318,7 @@ public class ArrayHelper {
      * @param c M0's column number
      * @return int[][] M0 / f
      */
-    public static int[][] DivArrayInPlace(int[][] arr0, int factor, int r, int c)
-    {
+    public static int[][] DivArrayInPlace(int[][] arr0, int factor, int r, int c) {
         int i, j;
         float f = factor;
 
@@ -365,7 +331,6 @@ public class ArrayHelper {
         return arr0;
     }
 
-
     /**
      * Multiply a matrix by a scalar, returns M0 * f
      *
@@ -375,8 +340,7 @@ public class ArrayHelper {
      * @param c M0's column number
      * @return int[][] M0 * f
      */
-    public static int[][] MulArray(int[][] arr0, int factor, int r, int c)
-    {
+    public static int[][] MulArray(int[][] arr0, int factor, int r, int c) {
         int i, j;
         int[][] result = new int[r][c];
 
@@ -389,7 +353,6 @@ public class ArrayHelper {
         return result;
     }
 
-
     /**
      * Multiply a matrix by a scalar, in-place (change M0 directly)
      *
@@ -399,8 +362,7 @@ public class ArrayHelper {
      * @param c M0's column number
      * @return int[][] M0 * f
      */
-    public static int[][] MulArrayInPlace(int[][] arr0, int factor, int r, int c)
-    {
+    public static int[][] MulArrayInPlace(int[][] arr0, int factor, int r, int c) {
         int i, j;
 
         for (i = 0; i < r; i++) {
@@ -412,7 +374,6 @@ public class ArrayHelper {
         return arr0;
     }
 
-
     /**
      * Normalize a 2D array of integers to the range [0, 255], in place
      *
@@ -420,8 +381,7 @@ public class ArrayHelper {
      * @param width arr's row number
      * @param height arr's column number
      */
-    public static void NormalizeImg(int[][] img, int width, int height)
-    {
+    public static void NormalizeImg(int[][] img, int width, int height) {
         int i, j, minVal = img[0][0], maxVal = img[0][0], diff;
 
         for (i = 0; i < width; i++) {
@@ -445,7 +405,6 @@ public class ArrayHelper {
         }
     }
 
-
     /**
      * Normalize an array of doubles to an array of integers with range [0, cap],
      * min-max normalization is used as it seems to be the most appropriate
@@ -456,8 +415,7 @@ public class ArrayHelper {
      * @param cap the cap (255 for 8-bit grayscale / 24-bit RGB colour images)
      * @return int[][] normalized array of integers
      */
-    public static int[][] NormalizeToImg(double[][] arr, int width, int height, int cap)
-    {
+    public static int[][] NormalizeToImg(double[][] arr, int width, int height, int cap) {
         int i, j;
         int[][] newImg = new int[width][height];
         double minVal = arr[0][0], maxVal = arr[0][0], diff;
@@ -485,7 +443,6 @@ public class ArrayHelper {
         return newImg;
     }
 
-
     /**
      * Normalize an array of doubles to an array of integers with range [0, 255],
      * min-max normalization is used as it seems to be the most appropriate
@@ -495,19 +452,16 @@ public class ArrayHelper {
      * @param height arr's column number
      * @return int[][] normalized array of integers
      */
-    public static int[][] NormalizeToImg(double[][] arr, int width, int height)
-    {
+    public static int[][] NormalizeToImg(double[][] arr, int width, int height) {
         return NormalizeToImg(arr, width, height, 255);
     }
-
 
     /**
      * Saves a grayscale image
      *
      * @param norm whether the pixel values should be normalized
      */
-    public static void SaveImg(int[][] pixels, String name, int depth, int width, int height, boolean norm)
-    {
+    public static void SaveImg(int[][] pixels, String name, int depth, int width, int height, boolean norm) {
         Image img = new Image(depth, width, height);
         img.pixels = pixels;
         if (norm) {
@@ -516,49 +470,40 @@ public class ArrayHelper {
         img.WritePGM(name);
     }
 
-
     /**
      * Saves a grayscale image with the same dimensions and colour depth as a template image
      *
      * @param norm whether the pixel values should be normalized
      */
-    public static void SaveImgLike(int[][] pixels, String name, ImagePPM image0, boolean norm)
-    {
+    public static void SaveImgLike(int[][] pixels, String name, ImagePPM image0, boolean norm) {
         SaveImg(pixels, name, image0.depth, image0.width, image0.height, norm);
     }
-
 
     /**
      * Saves a grayscale image, the pixel values are normalized (since they are doubles)
      */
-    public static void SaveImg(double[][] pixels, String name, int depth, int width, int height)
-    {
+    public static void SaveImg(double[][] pixels, String name, int depth, int width, int height) {
         Image img = new Image(depth, width, height);
         img.pixels = NormalizeToImg(pixels, width, height);
         img.WritePGM(name);
     }
 
-
     /**
      * Saves a colour image
      */
-    public static void SaveImg(int[][][] pixels, String name, int depth, int width, int height)
-    {
+    public static void SaveImg(int[][][] pixels, String name, int depth, int width, int height) {
         ImagePPM img = new ImagePPM(depth, width, height);
         img.pixels = pixels;
         img.WritePPM(name);
     }
 
-
     /**
      * Saves a grayscale image with the same dimensions and colour depth as a template image,
      * the pixel values are normalized (since they are doubles)
      */
-    public static void SaveImgLike(double[][] pixels, String name, ImagePPM templateImage)
-    {
+    public static void SaveImgLike(double[][] pixels, String name, ImagePPM templateImage) {
         SaveImg(pixels, name, templateImage.depth, templateImage.width, templateImage.height);
     }
-
 
     /**
      * Create a flattened rotation matrix that rotates vectors by an angle
@@ -566,12 +511,10 @@ public class ArrayHelper {
      * @param angle rotation angle (radian)
      * @return float[] flattened version of the rotation matrix
      */
-    public static float[] RotationMatrix(double angle)
-    {
+    public static float[] RotationMatrix(double angle) {
         float cosTheta = (float) Math.cos(angle), sinTheta = (float) Math.sin(angle);
-        return new float[] { cosTheta, -sinTheta, sinTheta, cosTheta };
+        return new float[] {cosTheta, -sinTheta, sinTheta, cosTheta};
     }
-
 
     /**
      * Get a column of a 2D array of integers, since Java's 2D int arrays are essentially
@@ -583,8 +526,7 @@ public class ArrayHelper {
      * @param width the row number of arr
      * @return int[] the column (arr[:][col])
      */
-    public static int[] GetCol(int[][] arr, int col, int width)
-    {
+    public static int[] GetCol(int[][] arr, int col, int width) {
         int[] column = new int[width];
 
         for (int i = 0; i < width; i++) {

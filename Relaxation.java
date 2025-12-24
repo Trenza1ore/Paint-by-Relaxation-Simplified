@@ -1,16 +1,15 @@
+import java.time.LocalTime;
 import java.util.*;
 import java.util.concurrent.*;
-import java.time.LocalTime;
 
 /**
  * This Relaxation class implements a stroke-based rendering algorithm inspired by the
  * conference paper Paint By Relaxation (Aaron Hertzmann, 2001)
  * @author Hugo (Jin Huang)
  */
-public class Relaxation
-{
+public class Relaxation {
     private static ImagePPM inputImg = new ImagePPM();
-    private static TaskManager taskStatus= new TaskManager();
+    private static TaskManager taskStatus = new TaskManager();
     private static int inputWidth, inputHeight;
     private static double density, noiseSigma = -1;
     private static long randomSeed = -1;
@@ -25,8 +24,7 @@ public class Relaxation
      * each layer of the pyramid are upscaled via bi-linear interpolation and summed together
      * to form the final sobel magnitude map
      */
-    private static void CreateMagMap()
-    {
+    private static void CreateMagMap() {
         int width, height; // of the current layer of pyramid
         int i, j, k; // Color channel/row/column index
 
@@ -34,29 +32,32 @@ public class Relaxation
         int[][][] current, previous = inputImg.pixels;
 
         // Create the first layer of the image pyramid
-        width = inputWidth; height = inputHeight;
+        width = inputWidth;
+        height = inputHeight;
         magMap = ImageProcessing.SobelMagnitude(previous, inputWidth, inputHeight);
 
         // Scale the image down until the next layer would have a width/height lower than 20
         while (width > 39 && height > 39) {
             // Create the current layer of the pyramid by halving width and height
-            width /= 2; height /= 2;
+            width /= 2;
+            height /= 2;
             current = new int[3][width][height];
 
             // Downsample pixels as a mean of the 4 corresponding pixels
             for (i = 0; i < 3; i++) {
                 for (j = 0; j < width; j++) {
                     for (k = 0; k < height; k++) {
-                        current[i][j][k] = (
-                            previous[i][2*j][2*k] + previous[i][2*j+1][2*k] +
-                            previous[i][2*j+1][2*k+1] + previous[i][2*j][2*k+1]) / 4;
+                        current[i][j][k] = (previous[i][2 * j][2 * k] + previous[i][2 * j + 1][2 * k]
+                                                   + previous[i][2 * j + 1][2 * k + 1] + previous[i][2 * j][2 * k + 1])
+                                / 4;
                     }
                 }
             }
 
             // Calculate Sobel Magnitude Map for the current layer
-            int[][] upscaledMap = ImageProcessing.BilinearInterpolate(
-                ImageProcessing.SobelMagnitude(current, width, height), width, height, inputWidth, inputHeight, true);
+            int[][] upscaledMap =
+                    ImageProcessing.BilinearInterpolate(ImageProcessing.SobelMagnitude(current, width, height), width,
+                            height, inputWidth, inputHeight, true);
             ArrayHelper.AddArrayInPlace(magMap, upscaledMap, inputWidth, inputHeight);
             previous = current;
         }
@@ -67,8 +68,7 @@ public class Relaxation
     /**
      * Box-filter the grayscale version of the input image and create the sobel orientation map
      */
-    private static void CreateOriMap()
-    {
+    private static void CreateOriMap() {
         int[][] img = ImageProcessing.BoxFilter(grayImg, inputWidth, inputHeight, 5);
         int row, col; // row/column index for the image
         int i, j; // row/column index for sobel operator kernals
@@ -80,18 +80,19 @@ public class Relaxation
 
         // Compute the image's convolution with Sobel operator
         // Like week 3 lab solution's implementation, it has zeros at the border
-        for (row = 0; row < inputWidth-2; row++) {
-            for (col = 0; col < inputHeight-2; col++) {
-                Gx = 0; Gy = 0;
+        for (row = 0; row < inputWidth - 2; row++) {
+            for (col = 0; col < inputHeight - 2; col++) {
+                Gx = 0;
+                Gy = 0;
                 // Calculate the image's convolution with sobel operator kernals
                 for (i = 0; i < 3; i++) {
                     for (j = 0; j < 3; j++) {
-                        I = img[row+i][col+j];
+                        I = img[row + i][col + j];
                         Gx += ImageProcessing.sobelX[i][j] * I;
                         Gy += ImageProcessing.sobelX[j][i] * I;
                     }
                 }
-                oriMap[row+1][col+1] = Math.atan2(Gy, Gx);
+                oriMap[row + 1][col + 1] = Math.atan2(Gy, Gx);
             }
         }
 
@@ -99,31 +100,27 @@ public class Relaxation
         // Those angles rotate clockwise instead of counterclockwise
         // In this way all angles in orientation map represent an angle
         // that rotates from the positive x-axis counterclockwise
-        for (row = 0; row < inputWidth-2; row++) {
-            for (col = 0; col < inputHeight-2; col++) {
-                if (oriMap[row+1][col+1] < 0) {
-                    oriMap[row+1][col+1] += twoPI;
+        for (row = 0; row < inputWidth - 2; row++) {
+            for (col = 0; col < inputHeight - 2; col++) {
+                if (oriMap[row + 1][col + 1] < 0) {
+                    oriMap[row + 1][col + 1] += twoPI;
                 }
             }
         }
     }
 
-
     /**
      * Create the Multi-scale Difference of Gaussians map and threshold it with threshold value 64
      */
-    private static void CreateMDoG()
-    {
+    private static void CreateMDoG() {
         MDoG = ImageProcessing.MDoG(grayImg, inputWidth, inputHeight, new int[] {1, 2, 4, 8});
         ImageProcessing.Threshold(MDoG, 64, inputWidth, inputHeight);
     }
 
-
     /**
      * Create multiple versions of the two brushes, create the MDoG map, and create the canvas
      */
-    private static void CreateBrushes(Float scale)
-    {
+    private static void CreateBrushes(Float scale) {
         // Use a thread pool with 8 threads to rotate the brushes
         ThreadPoolExecutor pool = (ThreadPoolExecutor) Executors.newFixedThreadPool(8);
         PixelRotator task;
@@ -137,7 +134,8 @@ public class Relaxation
             compact = ImageProcessing.BilinearInterpolate(compact, brush0.height, brushSize0);
             elongated = ImageProcessing.BilinearInterpolate(elongated, brush1.height, brushSize1);
         }
-        compactBrushes = new int[5][16][][]; elongatedBrushes = new int[5][16][][];
+        compactBrushes = new int[5][16][][];
+        elongatedBrushes = new int[5][16][][];
 
         // Generate the rotation matrices for each orientation
         for (i = 0; i < 16; i++) {
@@ -147,8 +145,8 @@ public class Relaxation
 
         // Create the various versions of brushes multi-threaded
         for (s = 0; s < 5; s++) {
-            scaledSize0[s] = (s+1)*brushSize0/5;
-            scaledSize1[s] = (s+1)*brushSize1/5;
+            scaledSize0[s] = (s + 1) * brushSize0 / 5;
+            scaledSize1[s] = (s + 1) * brushSize1 / 5;
             for (i = 0; i < 16; i++) {
                 if (s == 4) {
                     temp0 = compact;
@@ -158,8 +156,8 @@ public class Relaxation
                     temp1 = ImageProcessing.BilinearInterpolate(elongated, brushSize1, scaledSize1[s]);
                 }
                 // Use a larger array to hold the rotated brushes to not crop the out-of-bound parts
-                diagLen0[s] = (int) Math.sqrt(2*scaledSize0[s]*scaledSize0[s]);
-                diagLen1[s] = (int) Math.sqrt(2*scaledSize1[s]*scaledSize1[s]);
+                diagLen0[s] = (int) Math.sqrt(2 * scaledSize0[s] * scaledSize0[s]);
+                diagLen1[s] = (int) Math.sqrt(2 * scaledSize1[s] * scaledSize1[s]);
                 compactBrushes[s][i] = new int[diagLen0[s]][diagLen0[s]];
                 elongatedBrushes[s][i] = new int[diagLen1[s]][diagLen1[s]];
                 // Create tasks for the thread workers in the thread pool to work on
@@ -174,44 +172,40 @@ public class Relaxation
         pool.shutdown();
         // Block execution of the program until thread pool is shut down
         // This ensures that all of the brushes of different scales are rotated correctly
-        while (!pool.isTerminated()) {}
+        while (!pool.isTerminated()) {
+        }
 
         // Different versions of the brushes are created, start to create MDoG maps
         taskStatus.FinishTask();
         CreateMDoG();
 
         // Create the canvas and set the brushes
-        canvas = new Canvas(
-            taskStatus, inputImg.pixels, magMap, oriMap, MDoG, brushAngles, inputImg.width, inputImg.height,
-            inputImg.width * inputImg.height * density, noiseSigma, randomSeed
-        );
+        canvas = new Canvas(taskStatus, inputImg.pixels, magMap, oriMap, MDoG, brushAngles, inputImg.width,
+                inputImg.height, inputImg.width * inputImg.height * density, noiseSigma, randomSeed);
         canvas.SetUpCompactBrush(compactBrushes, scaledSize0, diagLen0);
         canvas.SetUpElongatedBrush(elongatedBrushes, scaledSize1, diagLen1);
     }
 
-
     /**
      * Add gaussian noise to the input image
      */
-    private static void AddGaussianNoise()
-    {
+    private static void AddGaussianNoise() {
         int i, row, col;
         Random RNG = new Random(randomSeed);
 
         for (row = 0; row < inputWidth; row++) {
             for (col = 0; col < inputHeight; col++) {
                 for (i = 0; i < 3; i++) {
-                    inputImg.pixels[i][row][col] = Integer.min(
-                        Integer.max((int) Math.round(
-                        inputImg.pixels[i][row][col] + RNG.nextGaussian() * noiseSigma),
-                        0), 255);
+                    inputImg.pixels[i][row][col] = Integer.min(Integer.max((int) Math.round(inputImg.pixels[i][row][col]
+                                                                                   + RNG.nextGaussian() * noiseSigma),
+                                                                       0),
+                            255);
                 }
             }
         }
 
         System.out.println("Gaussian noise has been added to the input image");
     }
-
 
     /**
      * Checks if the input image / brush images are loaded correctly and are valid:
@@ -221,8 +215,7 @@ public class Relaxation
      *
      * @param forceValid whether the user has passed in the -f flag as an argument
      */
-    private static void ValidateInputImages(boolean forceValid)
-    {
+    private static void ValidateInputImages(boolean forceValid) {
         inputWidth = inputImg.width;
         inputHeight = inputImg.height;
 
@@ -232,7 +225,8 @@ public class Relaxation
             if (forceValid) {
                 System.out.println("Warning: Image size exceeds maximum (input image maximum: 1500x1500)");
             } else {
-                ErrorMessage("Image size exceeds maximum (input image maximum: 1500x1500, mask/brush image maximum: 500x500)");
+                ErrorMessage("Image size exceeds maximum (input image maximum: 1500x1500, mask/brush image maximum: "
+                        + "500x500)");
             }
         }
 
@@ -243,24 +237,21 @@ public class Relaxation
 
         // Check if the colour depth is 24-bit (all ppm files should have 0-255 depth for each colour channel)
         if (inputImg.depth != 255) {
-            ErrorMessage(String.format("Input image has a colour depth of %d-bit instead of 24 " +
-                "thus it is not a valid ppm file!\n",
-                3 * Math.round(Math.log(inputImg.depth+1) / Math.log(2))));
+            ErrorMessage(String.format("Input image has a colour depth of %d-bit instead of 24 "
+                            + "thus it is not a valid ppm file!\n",
+                    3 * Math.round(Math.log(inputImg.depth + 1) / Math.log(2))));
         }
     }
-
 
     /**
      * Display an error message and stop execution of the program
      *
      * @param msg the error message
      */
-    public static void ErrorMessage(String msg)
-    {
+    public static void ErrorMessage(String msg) {
         System.out.printf("\nError (during task %d): \n%s\n", taskStatus.taskID, msg);
         System.exit(1);
     }
-
 
     /**
      * Flags: <p>
@@ -273,24 +264,24 @@ public class Relaxation
      *
      * @param args: input_image compact_brush elongated_brush density [-f] [-t threads] [-r seed] [-s scale] [-n std]
      */
-    public static void main(String[] args)
-    {
+    public static void main(String[] args) {
         int len = args.length, threads = 0;
         float scale = 1.0f;
         boolean forceValid = false, safeThreading = true;
         String[] inputImgPath = args[0].split("/");
-        String name = inputImgPath[inputImgPath.length-1], helpMsg =
-        "\nUsage:\n" +
-        "> java Relaxation -h | --help\n" +
-        "> java Relaxation <input_image> <compact_brush> <elongated_brush> <density> " +
-        "[-f] [-t <threads>] [-r <seed>] [-s <scale>] [-n <std>]\n" +
-        "Options:\n" +
-        "  -f force the program to proceed with an input image at any size\n" +
-        "  -t specifies the number of threads to use for painting, 0 (default): use cpu count\n" +
-        "  -r specify a random seed for a consistent output\n" +
-        "  -s specify a scaling factor for brush images\n" +
-        "  -n specify standard deviation for optional gaussian noise added to the smaller strokes in the painting\n" +
-        "  (if a negative value is set for threads, an unsafe multi-threading strategy is used)\n\n";
+        String name = inputImgPath[inputImgPath.length - 1],
+               helpMsg = "\nUsage:\n"
+                + "> java Relaxation -h | --help\n"
+                + "> java Relaxation <input_image> <compact_brush> <elongated_brush> <density> "
+                + "[-f] [-t <threads>] [-r <seed>] [-s <scale>] [-n <std>]\n"
+                + "Options:\n"
+                + "  -f force the program to proceed with an input image at any size\n"
+                + "  -t specifies the number of threads to use for painting, 0 (default): use cpu count\n"
+                + "  -r specify a random seed for a consistent output\n"
+                + "  -s specify a scaling factor for brush images\n"
+                + "  -n specify standard deviation for optional gaussian noise added to the smaller strokes in the "
+                + "painting\n"
+                + "  (if a negative value is set for threads, an unsafe multi-threading strategy is used)\n\n";
 
         taskStatus.StartTask();
 
@@ -313,7 +304,7 @@ public class Relaxation
                 switch (args[i]) {
                     // User specified a thread count
                     case "-t":
-                        String threadArg = args[i+1];
+                        String threadArg = args[i + 1];
                         if (threadArg.startsWith("-")) {
                             safeThreading = false;
                             threadArg = threadArg.substring(1);
@@ -324,7 +315,7 @@ public class Relaxation
                             ErrorMessage("Thread number isn't entered as an integer");
                         }
 
-                        if (args[i+1].equals("-1"))
+                        if (args[i + 1].equals("-1"))
                             ErrorMessage("Single threaded drawing cannot use unsafe strategy");
 
                         break;
@@ -332,7 +323,7 @@ public class Relaxation
                     // User specified a random seed
                     case "-r":
                         try {
-                            randomSeed = Long.parseUnsignedLong(args[i+1]);
+                            randomSeed = Long.parseUnsignedLong(args[i + 1]);
                         } catch (Exception numberFormatException) {
                             ErrorMessage("Random seed isn't entered as a natural number");
                         }
@@ -341,7 +332,7 @@ public class Relaxation
                     // User specified a random seed
                     case "-s":
                         try {
-                            scale = Float.parseFloat(args[i+1]);
+                            scale = Float.parseFloat(args[i + 1]);
                         } catch (Exception numberFormatException) {
                             ErrorMessage("Brush scale isn't entered as a floating point number");
                         }
@@ -350,12 +341,14 @@ public class Relaxation
                     // User specified a standard deviation for gaussian noise
                     case "-n":
                         try {
-                            noiseSigma = Double.parseDouble(args[i+1]);
+                            noiseSigma = Double.parseDouble(args[i + 1]);
                             if (noiseSigma <= 0) {
-                                throw new NumberFormatException("Standard deviation of gaussian noise can't be non-positive");
+                                throw new NumberFormatException(
+                                        "Standard deviation of gaussian noise can't be non-positive");
                             }
                         } catch (Exception numberFormatException) {
-                            ErrorMessage("Gaussian noise standard deviation isn't entered as a positive decimal number");
+                            ErrorMessage(
+                                    "Gaussian noise standard deviation isn't entered as a positive decimal number");
                         }
                         break;
 

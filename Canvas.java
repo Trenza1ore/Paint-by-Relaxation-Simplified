@@ -27,10 +27,8 @@ public class Canvas {
     private int[] DoGValue = {0, 255};
     private ReentrantLock canvasLock;
 
-
     public Canvas(TaskManager taskStatus, int[][][] srcImg, int[][] magMap, double[][] oriMap, int[][] DoG,
-        double[] brushAngles, int width, int height, double PD, double noiseSigma, long randomSeed)
-    {
+            double[] brushAngles, int width, int height, double PD, double noiseSigma, long randomSeed) {
         this.taskStatus = taskStatus;
         // If noise would be added, break the reference with source image
         if (noiseSigma > 0) {
@@ -56,7 +54,6 @@ public class Canvas {
         Clear();
     }
 
-
     /**
      * Set up the compact brush for the canvas
      *
@@ -65,13 +62,11 @@ public class Canvas {
      * @param scaledSize0 size of the original brush
      * @param diagLen0 size of the rotated brushes
      */
-    public void SetUpCompactBrush(int[][][][] compactBrushes, int[] scaledSize0, int[] diagLen0)
-    {
+    public void SetUpCompactBrush(int[][][][] compactBrushes, int[] scaledSize0, int[] diagLen0) {
         brushes[0] = compactBrushes;
         scaledSize[0] = scaledSize0;
         diagLen[0] = diagLen0;
     }
-
 
     /**
      * Set up the elongated brush for the canvas
@@ -81,21 +76,18 @@ public class Canvas {
      * @param scaledSize1 size of the original brush
      * @param diagLen1 size of the rotated brushes
      */
-    public void SetUpElongatedBrush(int[][][][] elongatedBrushes, int[] scaledSize1, int[] diagLen1)
-    {
+    public void SetUpElongatedBrush(int[][][][] elongatedBrushes, int[] scaledSize1, int[] diagLen1) {
         brushes[1] = elongatedBrushes;
         scaledSize[1] = scaledSize1;
         diagLen[1] = diagLen1;
     }
-
 
     /**
      * Set a seed for the random number generator
      *
      * @param randomSeed seed for the random number generator
      */
-    public void ReSeed(long randomSeed)
-    {
+    public void ReSeed(long randomSeed) {
         if (RNG == null) {
             RNG = new Random(randomSeed);
         } else {
@@ -103,17 +95,14 @@ public class Canvas {
         }
     }
 
-
     /**
      * Clear the canvas
      */
-    public void Clear()
-    {
+    public void Clear() {
         canvas = new int[3][width][height];
         if (safe)
             canvasVersion = new int[width][height];
     }
-
 
     /**
      * Evaluate a stroke by comparing the canvas's Absolute Difference with the source image
@@ -127,8 +116,7 @@ public class Canvas {
      * @param colEnd upper bound in columns (exclusive)
      * @return boolean whether the stroke is an improvement
      */
-    boolean EvalStroke(int[][][] newCanvas, int rowStart, int rowEnd, int colStart, int colEnd)
-    {
+    boolean EvalStroke(int[][][] newCanvas, int rowStart, int rowEnd, int colStart, int colEnd) {
         int oldAE = 0, newAE = 0; // Absolute errors
         int i, j, k; // index for channel/row/column
 
@@ -136,8 +124,8 @@ public class Canvas {
             for (j = rowStart; j < rowEnd; j++) {
                 for (k = colStart; k < colEnd; k++) {
                     // To assist unpainted area detection, canvas colors are increased by 1
-                    oldAE += Math.abs(srcImg[i][j][k] - canvas[i][j][k]-1);
-                    newAE += Math.abs(srcImg[i][j][k] - newCanvas[i][j-rowStart][k-colStart]-1);
+                    oldAE += Math.abs(srcImg[i][j][k] - canvas[i][j][k] - 1);
+                    newAE += Math.abs(srcImg[i][j][k] - newCanvas[i][j - rowStart][k - colStart] - 1);
                 }
             }
         }
@@ -145,19 +133,17 @@ public class Canvas {
         return (oldAE > newAE);
     }
 
-
     /**
      * Find the closest orientation of a brush given an angle
      *
      * @param angle the angle to match
      * @return int index of the closest orientation
      */
-    int FindClosestBrushAngle(double angle)
-    {
+    int FindClosestBrushAngle(double angle) {
         double next, current = Math.abs(brushAngles[0] - angle);
 
         for (int i = 0; i < 15; i++) {
-            next = Math.abs(brushAngles[i+1] - angle);
+            next = Math.abs(brushAngles[i + 1] - angle);
             if (current < next) {
                 // Check if the angle is between the first and last brush angle
                 if (i == 0) {
@@ -173,12 +159,10 @@ public class Canvas {
         return 15; // the last brush angle is the closest
     }
 
-
     /**
      * Paint the canvas in full
      */
-    public void PaintAll()
-    {
+    public void PaintAll() {
         int i;
         long N;
 
@@ -187,7 +171,7 @@ public class Canvas {
 
         // First pass with compact brushes
         for (i = 0; i < 5; i++) {
-            N = Math.round(PD*Math.pow(2, i));
+            N = Math.round(PD * Math.pow(2, i));
             PaintStrokes(0, i, N, noisyRender && i > 1);
             // One scale of the compact brush strokes painted onto the canvas, start next sub task
             taskStatus.FinishSubTask();
@@ -198,13 +182,12 @@ public class Canvas {
 
         // Second pass with elongated brushes
         for (i = 0; i < 5; i++) {
-            N = Math.round(PD*Math.pow(2, i));
+            N = Math.round(PD * Math.pow(2, i));
             PaintStrokes(1, i, N, noisyRender && i > 1);
             // One scale of the elongated brush strokes painted onto the canvas, start next sub task
             taskStatus.FinishSubTask();
         }
     }
-
 
     /**
      * Paint all the strokes of a given size of a given brush, if the edge magnitude
@@ -222,8 +205,7 @@ public class Canvas {
      * @param N number of positions to consider painting a stroke
      * @param noisyStroke whether the stroke's colour should be noisy
      */
-    public void PaintStrokes(int brushType, int i, long N, boolean noisyStroke)
-    {
+    public void PaintStrokes(int brushType, int i, long N, boolean noisyStroke) {
         int x, y;
         int nThreads = Math.abs(threads);
         if (nThreads < 2)
@@ -237,7 +219,7 @@ public class Canvas {
                 // Only paint if the edge magnitude corresponds to i and the thresholded
                 // MDoG value is appropriate (compact: 0, elongated: 255)
                 // For Java's integers, -1/n = 0, so this condition works
-                if ((DoG[x][y] == DoGValue[brushType]) && (((magMap[x][y]-1) / 51) == i)) {
+                if ((DoG[x][y] == DoGValue[brushType]) && (((magMap[x][y] - 1) / 51) == i)) {
                     // Only render the stroke as a noisy stroke if the stroke's size is
                     // 1/5 or 2/5 or 3/5 of the original brush size and the user wants noise
                     Paint(brushType, 4 - i, oriMap[x][y], x, y, noisyStroke);
@@ -255,12 +237,11 @@ public class Canvas {
                 // Only paint if the edge magnitude corresponds to i and the thresholded
                 // MDoG value is appropriate (compact: 0, elongated: 255)
                 // For Java's integers, -1/n = 0, so this condition works
-                if ((DoG[x][y] == DoGValue[brushType]) && (((magMap[x][y]-1) / 51) == i)) {
+                if ((DoG[x][y] == DoGValue[brushType]) && (((magMap[x][y] - 1) / 51) == i)) {
                     // Only render the stroke as a noisy stroke if the stroke's size is
                     // 1/5 or 2/5 or 3/5 of the original brush size and the user wants noise
-                    CanvasPainter painter = new CanvasPainter(
-                        this, brushType, 4 - i, oriMap[x][y], x, y, noisyStroke, canvasLock
-                    );
+                    CanvasPainter painter =
+                            new CanvasPainter(this, brushType, 4 - i, oriMap[x][y], x, y, noisyStroke, canvasLock);
                     futures.add(executor.submit(painter));
                 }
             }
@@ -298,8 +279,7 @@ public class Canvas {
      * @param y column-position of the proposed stroke on canvas
      * @param noisyStroke whether the stroke's colour should be noisy
      */
-    public void Paint(int brushType, int s, double edgeOrientation, int x, int y, boolean noisyStroke)
-    {
+    public void Paint(int brushType, int s, double edgeOrientation, int x, int y, boolean noisyStroke) {
         int row, col;
         int[][] brush = brushes[brushType][s][FindClosestBrushAngle(edgeOrientation)];
 
@@ -311,10 +291,10 @@ public class Canvas {
         float maskAreaFloat; // use float for improved accuracy when dividing
 
         // Calculate the area we need to draw on
-        x -= hfBrushSize; y -= hfBrushSize; // get the coordinate of the starting pixel
-        int rowStart = Integer.max(0, x), rowEnd = Integer.min(x+brushSize, width),
-            colStart = Integer.max(0, y), colEnd = Integer.min(y+brushSize, height),
-            colLen = colEnd - colStart;
+        x -= hfBrushSize;
+        y -= hfBrushSize; // get the coordinate of the starting pixel
+        int rowStart = Integer.max(0, x), rowEnd = Integer.min(x + brushSize, width), colStart = Integer.max(0, y),
+            colEnd = Integer.min(y + brushSize, height), colLen = colEnd - colStart;
 
         int[][][] newCanvas = ArrayHelper.CloneImage(canvas, rowStart, rowEnd, colStart, colEnd);
 
@@ -325,7 +305,7 @@ public class Canvas {
             strokeColourNoisy = new int[3];
             for (row = rowStart; row < rowEnd; row++) {
                 for (col = colStart; col < colEnd; col++) {
-                    if (brush[row-x][col-y] > 0) {
+                    if (brush[row - x][col - y] > 0) {
                         maskArea++;
                         strokeColour[0] += srcImg[0][row][col];
                         strokeColour[1] += srcImg[1][row][col];
@@ -345,7 +325,7 @@ public class Canvas {
             // Just calculate the normal stroke colour
             for (row = rowStart; row < rowEnd; row++) {
                 for (col = colStart; col < colEnd; col++) {
-                    if (brush[row-x][col-y] > 0) {
+                    if (brush[row - x][col - y] > 0) {
                         maskArea++;
                         strokeColour[0] += srcImg[0][row][col];
                         strokeColour[1] += srcImg[1][row][col];
@@ -365,10 +345,10 @@ public class Canvas {
         // Paint the new stroke
         for (row = rowStart; row < rowEnd; row++) {
             for (col = colStart; col < colEnd; col++) {
-                if (brush[row-x][col-y] > 0) {
-                    newCanvas[0][row-rowStart][col-colStart] = strokeColour[0];
-                    newCanvas[1][row-rowStart][col-colStart] = strokeColour[1];
-                    newCanvas[2][row-rowStart][col-colStart] = strokeColour[2];
+                if (brush[row - x][col - y] > 0) {
+                    newCanvas[0][row - rowStart][col - colStart] = strokeColour[0];
+                    newCanvas[1][row - rowStart][col - colStart] = strokeColour[1];
+                    newCanvas[2][row - rowStart][col - colStart] = strokeColour[2];
                 }
             }
         }
@@ -380,7 +360,7 @@ public class Canvas {
                 // If noisy strokes are wanted, render the noisy stroke
                 for (row = rowStart; row < rowEnd; row++) {
                     for (col = colStart; col < colEnd; col++) {
-                        if (brush[row-x][col-y] > 0) {
+                        if (brush[row - x][col - y] > 0) {
                             canvas[0][row][col] = strokeColourNoisy[0];
                             canvas[1][row][col] = strokeColourNoisy[1];
                             canvas[2][row][col] = strokeColourNoisy[2];
@@ -390,9 +370,9 @@ public class Canvas {
             } else {
                 // If no noise, then just render the normal stroke
                 for (row = rowStart; row < rowEnd; row++) {
-                    System.arraycopy(newCanvas[0][row-rowStart], 0, canvas[0][row], colStart, colLen);
-                    System.arraycopy(newCanvas[1][row-rowStart], 0, canvas[1][row], colStart, colLen);
-                    System.arraycopy(newCanvas[2][row-rowStart], 0, canvas[2][row], colStart, colLen);
+                    System.arraycopy(newCanvas[0][row - rowStart], 0, canvas[0][row], colStart, colLen);
+                    System.arraycopy(newCanvas[1][row - rowStart], 0, canvas[1][row], colStart, colLen);
+                    System.arraycopy(newCanvas[2][row - rowStart], 0, canvas[2][row], colStart, colLen);
                 }
             }
         }
@@ -411,8 +391,7 @@ public class Canvas {
      * @param offset the offset value of all pixels in the canvas, used to assist
      * unpainted area detection
      */
-    public void FillBackground(int[][][] canvas, int offset)
-    {
+    public void FillBackground(int[][][] canvas, int offset) {
         // A list of all unpainted regions in the canvas, each region is stored
         // as a list of coordinates (which are integer arrays with 2 elements)
         LinkedList<LinkedList<int[]>> unpaintedRegions = new LinkedList<>();
@@ -444,7 +423,7 @@ public class Canvas {
                 for (; col < height; col++) {
                     // After visiting an unpainted pixel, push it into search queue as new seed
                     if (canvasSlice[row][col] == 0 && !visited[row][col]) {
-                        searchQueue.push(new int[] { row, col });
+                        searchQueue.push(new int[] {row, col});
                         visited[row][col] = true;
                         searchNotFinished = true;
                         // A new region's discovered, initialize its list of members
@@ -464,26 +443,27 @@ public class Canvas {
             // Breadth-first search the pixels in the seed's region
             while (!searchQueue.isEmpty()) {
                 pos = searchQueue.removeLast();
-                row = pos[0]; col = pos[1];
+                row = pos[0];
+                col = pos[1];
 
                 // Visit the neighbouring unpainted pixels
                 if (canvasSlice[row][col] == 0) {
                     unpaintedRegions.get(regionCounter).add(pos);
-                    if (row > 0 && !visited[row-1][col]) {
-                        visited[row-1][col] = true;
-                        searchQueue.push(new int[] { row-1, col });
+                    if (row > 0 && !visited[row - 1][col]) {
+                        visited[row - 1][col] = true;
+                        searchQueue.push(new int[] {row - 1, col});
                     }
-                    if (row < width-1 && !visited[row+1][col]) {
-                        visited[row+1][col] = true;
-                        searchQueue.push(new int[] { row+1, col });
+                    if (row < width - 1 && !visited[row + 1][col]) {
+                        visited[row + 1][col] = true;
+                        searchQueue.push(new int[] {row + 1, col});
                     }
-                    if (col > 0 && !visited[row][col-1]) {
-                        visited[row][col-1] = true;
-                        searchQueue.push(new int[] { row, col-1 });
+                    if (col > 0 && !visited[row][col - 1]) {
+                        visited[row][col - 1] = true;
+                        searchQueue.push(new int[] {row, col - 1});
                     }
-                    if (col < height-1 && !visited[row][col+1]) {
-                        visited[row][col+1] = true;
-                        searchQueue.push(new int[] { row, col+1 });
+                    if (col < height - 1 && !visited[row][col + 1]) {
+                        visited[row][col + 1] = true;
+                        searchQueue.push(new int[] {row, col + 1});
                     }
                 }
             }
@@ -525,8 +505,7 @@ public class Canvas {
      * unpainted area detection
      * @return int[][][] the canvas with all pixels' RGB values normalized to [0, 255]
      */
-    public int[][][] NormalizeCanvas(int[][][] canvas, int offset)
-    {
+    public int[][][] NormalizeCanvas(int[][][] canvas, int offset) {
         int[][][] result = new int[3][width][height];
         int i, j, k;
 
@@ -548,17 +527,16 @@ public class Canvas {
      * @param sigma standard deviation
      * @return int[][][] blurred image
      */
-    public int[][][] GaussianBlur(int[][][] canvas, int sigma)
-    {
+    public int[][][] GaussianBlur(int[][][] canvas, int sigma) {
         int[][][] result = new int[3][][];
 
         for (int i = 0; i < 3; i++) {
-            result[i] = ArrayHelper.Double2Int(ImageProcessing.GaussianBlur(canvas[i], sigma, width, height), width, height);
+            result[i] = ArrayHelper.Double2Int(
+                    ImageProcessing.GaussianBlur(canvas[i], sigma, width, height), width, height);
         }
 
         return NormalizeCanvas(result, 0);
     }
-
 
     /**
      * Render all of the resulting images and save them separately<p>
@@ -574,8 +552,7 @@ public class Canvas {
      * <p>
      * - Result-filled-blur.ppm: blurred version of the painted image with unpainted pixels filled
      */
-    public void RenderImages()
-    {
+    public void RenderImages() {
         int[][][] img;
 
         // Render normal canvas

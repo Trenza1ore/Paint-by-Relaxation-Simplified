@@ -6,8 +6,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * for concurrent painting operations.
  * @author Hugo (Jin Huang)
  */
-public class CanvasPainter implements Runnable
-{
+public class CanvasPainter implements Runnable {
     private Canvas canvas;
     private int brushType;
     private int s;
@@ -29,9 +28,8 @@ public class CanvasPainter implements Runnable
      * @param noisyStroke whether to use noisy stroke rendering
      * @param lock the lock for synchronizing access to the canvas
      */
-    public CanvasPainter(Canvas canvas, int brushType, int s, double edgeOrientation,
-                         int x, int y, boolean noisyStroke, ReentrantLock lock)
-    {
+    public CanvasPainter(Canvas canvas, int brushType, int s, double edgeOrientation, int x, int y, boolean noisyStroke,
+            ReentrantLock lock) {
         this.canvas = canvas;
         this.brushType = brushType;
         this.s = s;
@@ -43,8 +41,7 @@ public class CanvasPainter implements Runnable
     }
 
     @Override
-    public void run()
-    {
+    public void run() {
         int row, col;
         int[][] brush = canvas.brushes[brushType][s][canvas.FindClosestBrushAngle(edgeOrientation)];
 
@@ -56,9 +53,10 @@ public class CanvasPainter implements Runnable
         float maskAreaFloat; // use float for improved accuracy when dividing
 
         // Calculate the area we need to draw on
-        x -= hfBrushSize; y -= hfBrushSize; // get the coordinate of the starting pixel
-        int rowStart = Integer.max(0, x), rowEnd = Integer.min(x+brushSize, canvas.width),
-            colStart = Integer.max(0, y), colEnd = Integer.min(y+brushSize, canvas.height),
+        x -= hfBrushSize;
+        y -= hfBrushSize; // get the coordinate of the starting pixel
+        int rowStart = Integer.max(0, x), rowEnd = Integer.min(x + brushSize, canvas.width),
+            colStart = Integer.max(0, y), colEnd = Integer.min(y + brushSize, canvas.height),
             colLen = colEnd - colStart;
 
         // Calculate the colour of the stroke (doesn't need lock, only reads from srcImg)
@@ -72,7 +70,7 @@ public class CanvasPainter implements Runnable
             strokeColourNoisy = new int[3];
             for (row = rowStart; row < rowEnd; row++) {
                 for (col = colStart; col < colEnd; col++) {
-                    if (brush[row-x][col-y] > 0) {
+                    if (brush[row - x][col - y] > 0) {
                         maskArea++;
                         strokeColour[0] += canvas.srcImg[0][row][col];
                         strokeColour[1] += canvas.srcImg[1][row][col];
@@ -92,7 +90,7 @@ public class CanvasPainter implements Runnable
             // Just calculate the normal stroke colour
             for (row = rowStart; row < rowEnd; row++) {
                 for (col = colStart; col < colEnd; col++) {
-                    if (brush[row-x][col-y] > 0) {
+                    if (brush[row - x][col - y] > 0) {
                         maskArea++;
                         strokeColour[0] += canvas.srcImg[0][row][col];
                         strokeColour[1] += canvas.srcImg[1][row][col];
@@ -139,10 +137,10 @@ public class CanvasPainter implements Runnable
             // Paint the new stroke on the cloned canvas (outside lock)
             for (row = rowStart; row < rowEnd; row++) {
                 for (col = colStart; col < colEnd; col++) {
-                    if (brush[row-x][col-y] > 0) {
-                        newCanvas[0][row-rowStart][col-colStart] = strokeColour[0];
-                        newCanvas[1][row-rowStart][col-colStart] = strokeColour[1];
-                        newCanvas[2][row-rowStart][col-colStart] = strokeColour[2];
+                    if (brush[row - x][col - y] > 0) {
+                        newCanvas[0][row - rowStart][col - colStart] = strokeColour[0];
+                        newCanvas[1][row - rowStart][col - colStart] = strokeColour[1];
+                        newCanvas[2][row - rowStart][col - colStart] = strokeColour[2];
                     }
                 }
             }
@@ -160,7 +158,8 @@ public class CanvasPainter implements Runnable
                                 break;
                             }
                         }
-                        if (versionChanged) break;
+                        if (versionChanged)
+                            break;
                     }
 
                     // If version changed, restart
@@ -184,7 +183,7 @@ public class CanvasPainter implements Runnable
                         // If noisy strokes are wanted, render the noisy stroke
                         for (row = rowStart; row < rowEnd; row++) {
                             for (col = colStart; col < colEnd; col++) {
-                                if (brush[row-x][col-y] > 0) {
+                                if (brush[row - x][col - y] > 0) {
                                     canvas.canvas[0][row][col] = strokeColourNoisy[0];
                                     canvas.canvas[1][row][col] = strokeColourNoisy[1];
                                     canvas.canvas[2][row][col] = strokeColourNoisy[2];
@@ -194,15 +193,9 @@ public class CanvasPainter implements Runnable
                     } else {
                         // If no noise, then just render the normal stroke
                         for (row = rowStart; row < rowEnd; row++) {
-                            System.arraycopy(
-                                newCanvas[0][row-rowStart], 0, canvas.canvas[0][row], colStart, colLen
-                            );
-                            System.arraycopy(
-                                newCanvas[1][row-rowStart], 0, canvas.canvas[1][row], colStart, colLen
-                            );
-                            System.arraycopy(
-                                newCanvas[2][row-rowStart], 0, canvas.canvas[2][row], colStart, colLen
-                            );
+                            System.arraycopy(newCanvas[0][row - rowStart], 0, canvas.canvas[0][row], colStart, colLen);
+                            System.arraycopy(newCanvas[1][row - rowStart], 0, canvas.canvas[1][row], colStart, colLen);
+                            System.arraycopy(newCanvas[2][row - rowStart], 0, canvas.canvas[2][row], colStart, colLen);
                         }
                     }
                 }
