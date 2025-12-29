@@ -64,11 +64,19 @@ public class ImagePPM {
             in2.skip((line + "\n").getBytes().length);
             st = new StringTokenizer(line);
             depth = Integer.parseInt(st.nextToken());
+            if (depth <= 0 || depth >= 65536)
+                throw new IOException("PPM P6 standard specified that 0 < Maxval < 65536");
 
             // read pixels now
-            for (int y = 0; y < height; y++)
-                for (int x = 0; x < width; x++)
-                    for (int i = 0; i < 3; i++) pixels[i][x][y] = in2.readUnsignedByte();
+            if (depth < 256) {
+                for (int y = 0; y < height; y++)
+                    for (int x = 0; x < width; x++)
+                        for (int i = 0; i < 3; i++) pixels[i][x][y] = in2.readUnsignedByte();
+            } else {
+                for (int y = 0; y < height; y++)
+                    for (int x = 0; x < width; x++)
+                        for (int i = 0; i < 3; i++) pixels[i][x][y] = in2.readUnsignedShort();
+            }
 
             in.close();
             in2.close();
@@ -77,7 +85,7 @@ public class ImagePPM {
         } catch (FileNotFoundException e) {
             System.out.println("Error: file " + fileName + " not found");
         } catch (IOException e) {
-            System.out.println("Error: end of stream encountered when reading " + fileName);
+            System.out.println("Error: end of stream encountered when reading " + fileName + ": " + e.getMessage());
         }
     }
 
